@@ -1,0 +1,25 @@
+{
+  "site": { "title": "HC Web Labs — Blog" },
+  "posts": [
+    {
+      "title": "Why I Love Mobile-First",
+      "slug": "mobile-first-love",
+      "date": "2025-10-20",
+      "tags": ["CSS", "Responsive", "Process"],
+      "summary": "My breakpoints, grid habits, and how I stop theme bleed in component-scoped CSS.",
+      "url": "posts/mobile-first-love.html",
+      "cover": "",
+      "words": 820
+    },
+    {
+      "title": "Perf Badge, Explained",
+      "slug": "perf-badge-explainer",
+      "date": "2025-10-18",
+      "tags": ["Performance", "Core Web Vitals"],
+      "summary": "The tiny badge I use to summarize LCP, CLS, and INP targets in project cards.",
+      "url": "posts/perf-badge-explainer.html",
+      "cover": "",
+      "words": 640
+    }
+  ]
+}
