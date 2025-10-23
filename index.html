@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HC Web Labs — Blog</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Heather Cooper — blog posts on web design & front-end, projects, notes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarpanch:wght@700;800&family=Mulish:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============ HARD/DEEP SCOPE (drop-in safe) ============ */
+  :root{
+    --ink:#EDEDED; --mut:#BFC7D8; --bg:#0b0c10; --card:#141722; --line:#ffffff22;
+    --accent:#8a7dff; --accent2:#00e0ff;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--ink);
+    background: radial-gradient(80rem 60rem at 20% -10%, #1b1e2a 0, #0b0c10 60%), var(--bg);
+    font-family:Mulish,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; line-height:1.6
+  }
+  header{padding:32px 20px; max-width:1100px; margin:0 auto}
+  h1{font-family:Sarpanch,system-ui; font-weight:800; letter-spacing:.5px; margin:0 0 8px; font-size:clamp(28px,4vw,44px)}
+  .sub{color:var(--mut)}
+  main{max-width:1100px; margin:0 auto; padding:12px 20px 56px}
+
+  /* Controls */
+  .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:6px 0 18px}
+  input,select,button{font:inherit}
+  .control{
+    background:#111628; border:1px solid var(--line); color:var(--ink);
+    border-radius:12px; padding:10px 12px
+  }
+  .pill{border-radius:999px}
+  .tagsbar{display:flex; gap:8px; flex-wrap:wrap}
+  .tagbtn{
+    border:1px solid var(--line); background:#111628; color:var(--ink);
+    border-radius:999px; padding:8px 12px; cursor:pointer; font-size:.9rem
+  }
+  .tagbtn.active{outline:2px solid var(--accent); outline-offset:2px}
+
+  /* Grid */
+  .grid{display:grid; grid-template-columns:1fr; gap:16px}
+  @media(min-width:760px){ .grid{grid-template-columns:1fr 1fr} }
+  @media(min-width:1120px){ .grid{grid-template-columns:1fr 1fr 1fr} }
+
+  /* Card */
+  .card{
+    display:flex; flex-direction:column; gap:10px;
+    background:linear-gradient(180deg, #1a1e2b99, #0f1320cc);
+    border:1px solid var(--line); border-radius:16px; padding:16px;
+    transition:transform .18s ease, box-shadow .18s ease; text-decoration:none; color:inherit
+  }
+  .card:hover{ transform:translateY(-2px); box-shadow:0 10px 24px #00000066 }
+  .cover{width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:12px; border:1px solid var(--line); background:#0e1322}
+  .card h3{margin:6px 0 2px; font-size:1.05rem}
+  .meta{font-size:.86rem; color:var(--mut); display:flex; gap:10px; flex-wrap:wrap}
+  .t{display:inline-block; padding:.15rem .5rem; border:1px solid var(--line); border-radius:999px; font-size:.75rem}
+  .excerpt{color:#d7d9e0; margin:4px 0 6px}
+  .more{margin-top:auto; display:inline-flex; align-items:center; gap:8px; color:var(--accent); text-underline-offset:2px}
+
+  /* Pager */
+  nav.pager{display:flex; gap:8px; justify-content:center; margin-top:16px}
+  nav.pager button{background:#191d2a; color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:8px 12px; cursor:pointer}
+  nav.pager button[disabled]{opacity:.5; cursor:not-allowed}
+
+  footer{max-width:1100px; margin:24px auto 60px; padding:0 20px; color:var(--mut); font-size:.9rem}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+  <header>
+    <h1>HC Web Labs — Blog</h1>
+    <p class="sub">Modern, affordable web design for Knoxville & East Tennessee — posts, tutorials, and project logs.</p>
+  </header>
+
+  <main>
+    <!-- Controls -->
+    <section class="toolbar" aria-label="Filters">
+      <input id="q" class="control pill" placeholder="Search title/summary/tags… (⌘/Ctrl+K)" aria-label="Search posts">
+      <select id="sort" class="control pill" aria-label="Sort">
+        <option value="date">Sort: Newest first</option>
+        <option value="title">Sort: Title A→Z</option>
+        <option value="read">Sort: Shortest read</option>
+      </select>
+      <select id="perpage" class="control pill" aria-label="Per page">
+        <option value="6">6 / page</option>
+        <option value="9" selected>9 / page</option>
+        <option value="12">12 / page</option>
+      </select>
+    </section>
+    <section class="tagsbar" id="tagbar" aria-label="Tag filter"></section>
+
+    <!-- Grid -->
+    <section class="grid" id="cards" aria-label="Posts grid"></section>
+    <nav class="pager" id="pager" aria-label="Pagination"></nav>
+  </main>
+
+  <footer>© <span id="year"></span> HC Web Labs. Powered by a zero-build JSON feed.</footer>
+
+  <!-- Fallback seed (used if posts.json fetch fails) -->
+  <script type="application/json" id="seed">
+  {
+    "site": {"title": "HC Web Labs — Blog"},
+    "posts": [
+      {
+        "title":"Why I Love Mobile-First",
+        "slug":"mobile-first-love",
+        "date":"2025-10-20",
+        "tags":["CSS","Responsive","Process"],
+        "summary":"My breakpoints, grid habits, and how I stop theme bleed in component-scoped CSS.",
+        "url":"posts/mobile-first-love.html",
+        "cover":"",
+        "words": 820
+      },
+      {
+        "title":"Perf Badge, Explained",
+        "slug":"perf-badge-explainer",
+        "date":"2025-10-18",
+        "tags":["Performance","Core Web Vitals"],
+        "summary":"The tiny badge I use to summarize LCP, CLS, and INP targets in project cards.",
+        "url":"posts/perf-badge-explainer.html",
+        "cover":"",
+        "words": 640
+      },
+      {
+        "title":"Design Tokens I Reuse",
+        "slug":"hcwl-tokens",
+        "date":"2025-10-15",
+        "tags":["Design Systems","CSS"],
+        "summary":"My aqua-violet gradient, etched glass cards, and when I swap tokens per client.",
+        "url":"posts/hcwl-tokens.html",
+        "cover":"",
+        "words": 540
+      }
+    ]
+  }
+  </script>
+
+  <script>
+  // ===== Utilities
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const fmtDate = d => new Date(d+'T00:00:00').toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+  const readTime = words => Math.max(1, Math.round(words/200)); // ~200wpm
+
+  // ===== State
+  const state = { posts:[], page:1, per:9, q:'', tag:null, sort:'date' };
+
+  // ===== Data load (prefer posts.json; fallback to #seed)
+  async function loadData(){
+    try{
+      const r = await fetch('./posts.json',{cache:'no-store'});
+      if(!r.ok) throw new Error('no posts.json');
+      const json = await r.json();
+      return json;
+    }catch(e){
+      const seed = JSON.parse($('#seed').textContent);
+      console.warn('Using fallback seed:', e.message);
+      return seed;
+    }
+  }
+
+  // ===== Rendering
+  function buildTagbar(){
+    const set = new Set();
+    state.posts.forEach(p=> (p.tags||[]).forEach(t=> set.add(t)));
+    const bar = $('#tagbar');
+    const tags = [...set].sort();
+    bar.innerHTML = ['All', ...tags].map(t=>{
+      const v = t==='All' ? '' : t;
+      const cls = (state.tag===v ? 'tagbtn active' : 'tagbtn');
+      return `<button class="${cls}" data-tag="${v}">${t}</button>`;
+    }).join('');
+    $$('#tagbar .tagbtn').forEach(b=> b.onclick = ()=>{
+      const v = b.dataset.tag || null;
+      state.tag = (state.tag===v?null:v);
+      state.page = 1;
+      buildTagbar();
+      draw();
+    });
+  }
+
+  function filtered(){
+    const q = state.q.toLowerCase();
+    return state.posts.filter(p=>{
+      const tOK = state.tag ? (p.tags||[]).includes(state.tag) : true;
+      const qOK = q ? (
+        (p.title||'').toLowerCase().includes(q) ||
+        (p.summary||'').toLowerCase().includes(q) ||
+        (p.tags||[]).join(' ').toLowerCase().includes(q)
+      ) : true;
+      return tOK && qOK;
+    }).sort((a,b)=>{
+      if(state.sort==='title') return (a.title||'').localeCompare(b.title||'');
+      if(state.sort==='read') return (a.words||0)-(b.words||0);
+      // default: date desc
+      return (b.date||'').localeCompare(a.date||'');
+    });
+  }
+
+  function draw(){
+    const all = filtered();
+    const start = (state.page-1)*state.per;
+    const pageItems = all.slice(start, start+state.per);
+
+    $('#cards').innerHTML = pageItems.map(p=>`
+      <a class="card" href="${p.url}" aria-label="Open ${p.title}">
+        ${p.cover ? `<img class="cover" loading="lazy" alt="" src="${p.cover}">` : ``}
+        <h3>${p.title}</h3>
+        <div class="meta">
+          <span>${fmtDate(p.date)}</span>
+          <span>• ${readTime(p.words||0)} min read</span>
+          ${(p.tags||[]).map(t=>`<span class="t">${t}</span>`).join('')}
+        </div>
+        <p class="excerpt">${p.summary||''}</p>
+        <span class="more">Read post →</span>
+      </a>
+    `).join('') || `<p>No posts match your filter.</p>`;
+
+    // Pager
+    const pages = Math.max(1, Math.ceil(all.length / state.per));
+    const pager = $('#pager');
+    if(pages<=1){ pager.innerHTML=''; return; }
+    const btn = (n, label=n, dis=false)=> `<button ${dis?'disabled':''} data-goto="${n}">${label}</button>`;
+    pager.innerHTML = btn(Math.max(1,state.page-1),'Prev', state.page===1)
+                    + Array.from({length:pages},(_,i)=>btn(i+1,i+1, i+1===state.page)).join('')
+                    + btn(Math.min(pages,state.page+1),'Next', state.page===pages);
+    $$('#pager button').forEach(b=> b.onclick = ()=>{ state.page = Number(b.dataset.goto); draw(); });
+  }
+
+  // ===== Wire up UI
+  (async function init(){
+    const data = await loadData();
+    document.title = data?.site?.title || document.title;
+    $('#year').textContent = (new Date).getFullYear();
+
+    state.posts = (data.posts||[]).map(p=>({
+      ...p,
+      tags: Array.isArray(p.tags)? p.tags : String(p.tags||'').split(/[,\s]+/).filter(Boolean)
+    }));
+
+    // controls
+    $('#q').addEventListener('input', e=>{ state.q = e.target.value.trim(); state.page=1; draw(); });
+    $('#sort').addEventListener('change', e=>{ state.sort = e.target.value; state.page=1; draw(); });
+    $('#perpage').addEventListener('change', e=>{ state.per = Number(e.target.value)||9; state.page=1; draw(); });
+    document.addEventListener('keydown', e=>{
+      if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); $('#q').focus(); }
+    });
+
+    buildTagbar();
+    draw();
+
+    // ===== Optional: JSON-LD Blog ItemList (for SEO) =====
+    try{
+      const items = state.posts.slice(0, 20).map((p,i)=>({
+        "@type":"ListItem", "position": i+1,
+        "url": new URL(p.url, location.href).href,
+        "name": p.title
+      }));
+      const ld = {
+        "@context":"https://schema.org",
+        "@type":"Blog",
+        "name": data?.site?.title || "Blog",
+        "url": location.href,
+        "blogPost": state.posts.map(p=>({
+          "@type":"BlogPosting",
+          "headline": p.title,
+          "url": new URL(p.url, location.href).href,
+          "datePublished": p.date,
+          "articleSection": p.tags||[],
+          "wordCount": p.words||undefined,
+          "image": p.cover||undefined,
+          "description": p.summary||undefined
+        })),
+        "hasPart": {"@type":"ItemList", "itemListElement": items}
+      };
+      const s = document.createElement('script');
+      s.type = 'application/ld+json';
+      s.textContent = JSON.stringify(ld);
+      document.head.appendChild(s);
+    }catch(e){}
+  })();
+  </script>
+</body>
+</html>
